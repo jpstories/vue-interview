@@ -26,17 +26,24 @@
 
       <button type="submit" class="v-table__add-btn">Добавить</button>
     </form>
+    <alert class="alert__added" v-if="showMessage" message="Пользователь добавлен!"></alert>
   </div>
 </template>
 
 <script>
+import Alert from '../Alert/Alert'
 export default {
+  name: 'v-table-add',
+  components: {
+    alert: Alert
+  },
   data: () => ({
     id: null,
     name: null,
     typeWork: null,
     contract: null,
     pay: null,
+    showMessage: false,
   }),
 
   methods: {
@@ -55,6 +62,11 @@ export default {
       this.typeWork = null;
       this.contract = null;
       this.pay = null;
+      this.showMessage = true;
+
+      setTimeout(() => {
+        this.showMessage = false;
+      }, 2000)
     },
   },
 };
@@ -122,5 +134,11 @@ select {
 
 .v-table__input-typeWork {
   margin-left: 22px;
+}
+.alert__added {
+  position: fixed;
+  top: 40px;
+  left: 5%;
+  width: 90%;
 }
 </style>

@@ -86,7 +86,7 @@
         </svg>
       </div>
 
-      <VTableAdd @review-submitted="addWorker" />
+      <v-table-add @review-submitted="addWorker" />
     </div>
 
     <div class="v-table__pagination">
@@ -104,8 +104,9 @@
 </template>
 
 <script>
+import users from "../../data/users";
 import vTableRow from "./v-table-row.vue";
-import VTableAdd from "./VTableAdd.vue";
+import VTableAdd from "./v-table-add.vue";
 
 export default {
   name: "v-table",
@@ -113,22 +114,22 @@ export default {
     vTableRow,
     VTableAdd,
   },
-  props: {
-    users_data: {
-      type: Array,
-      default: () => {
-        return [];
-      },
-    },
-  },
+
   data() {
     return {
+      users_data: users,
       usersPerPage: 10,
       pageNumber: 1,
       rotatedProfit: false,
       rotatedName: false,
       turn: 180,
-      inputPayment: ''
+
+      editForm: {
+        id: "",
+        typeWork: "",
+        contract: "",
+        pay: "",
+      },
     };
   },
 

@@ -1,23 +1,17 @@
 <template>
   <div id="app">
-    <v-table :users_data="users" />
-    
+    <router-view/>
   </div>
 </template>
 
 <script>
 // import { mapActions, mapGetters } from "vuex";
-import vTable from "./components/table/v-table";
-import users from "./data/users";
 
 export default {
   name: "App",
-  components: {
-    vTable,
-  },
   data: () => {
     return {
-      users: users
+
     };
   },
   // computed: {

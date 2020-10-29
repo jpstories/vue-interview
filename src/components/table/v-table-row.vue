@@ -5,14 +5,70 @@
     <div class="row row__spent">{{ userObj.contract }}</div>
 
     <div class="row row__pay">
-      <mark><a href="#">{{ userObj.pay }} руб.</a></mark>
-      <img class="row__pay-img" src="../../assets/calendar.png"/>
+      <mark
+        ><a href="#">{{ userObj.pay }} руб.</a></mark
+      >
+      <img class="row__pay-img" src="../../assets/calendar.png" />
     </div>
 
     <div class="row row__actions">
-      <button>Редактировать</button>
+      <button v-b-modal.book-update-modal @click="editUser(userObj)">
+        Редактировать
+      </button>
       <button @click="removeWorker(index)">Удалить</button>
     </div>
+
+    <b-modal
+      ref="editUserModal"
+      id="user-update-modal"
+      title="Update"
+      hide-footer
+    >
+      <b-form @submit="onSubmitUpdate" class="w-100">
+        <b-form-group
+          id="form-title-edit-group"
+          label="Ф.И.О:"
+          label-for="form-title-edit-input"
+        >
+          <b-form-input
+            id="form-title-edit-input"
+            type="text"
+            v-model="editForm.name"
+            required
+          >
+          </b-form-input>
+        </b-form-group>
+
+        <b-form-group
+          id="form-typework-edit-group"
+          label="Тип занятости:"
+          label-for="form-typework-edit-input"
+        >
+          <b-form-input
+            id="form-typework-edit-input"
+            type="text"
+            v-model="editForm.typeWork"
+            required
+          >
+          </b-form-input>
+        </b-form-group>
+
+        <b-form-group
+          id="form-contract-edit-group"
+          label="Трудоустройство:"
+          label-for="form-contract-edit-input"
+        >
+          <b-form-input
+            id="form-contract-edit-input"
+            type="text"
+            v-model="editForm.contract"
+            required
+          >
+          </b-form-input>
+        </b-form-group>
+        <b-button type="submit" variant="primary">Обновить</b-button>
+      </b-form>
+    </b-modal>
   </div>
 </template>
 
@@ -31,6 +87,12 @@ export default {
   data() {
     return {
       index: Number,
+      editForm: {
+        id: "",
+        name: "",
+        typeWork: "",
+        contract: "",
+      },
     };
   },
 
@@ -39,6 +101,27 @@ export default {
       if (confirm("Вы действительно хотите удалить сотрудника?")) {
         this.$emit("onRemoveWorker", index);
       }
+    },
+
+    editUser(userObj) {
+      this.editForm = userObj;
+    },
+
+    onSubmitUpdate(event) {
+      event.preventDefault();
+      this.$refs.editUserModal.hide();
+
+      const payload = {
+        name: this.editForm.name,
+        typeWork: this.editForm.typeWork,
+        contract: this.editForm.contract,
+      };
+
+      this.updateUser(payload, this.editForm.id);
+    },
+
+    updateUser(payload, userID) {
+      console.log(payload, userID)
     },
   },
 };
@@ -70,6 +153,6 @@ export default {
 .row__actions {
   display: flex;
   flex-flow: row;
-  align-items:center;
+  align-items: center;
 }
 </style>
