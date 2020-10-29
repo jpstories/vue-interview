@@ -24,7 +24,7 @@
         <input id="profit" name="profit" v-model="pay" type="text" required />
       </div>
 
-      <button type="submit" class="v-table__add-btn">Добавить</button>
+      <button type="submit" class="btn btn-dark v-table__add-btn">Добавить</button>
     </form>
     <alert class="alert__added" v-if="showMessage" message="Пользователь добавлен!"></alert>
   </div>
@@ -48,7 +48,7 @@ export default {
 
   methods: {
     onSubmit() {
-      const userAdded = {
+      const userAddObj = {
         id: Math.ceil(Math.random(1, 4000)),
         name: this.name,
         typeWork: this.typeWork,
@@ -56,7 +56,9 @@ export default {
         pay: +this.pay,
       };
 
-      this.$emit("review-submitted", userAdded);
+      this.$emit("addHandlerUser", userAddObj);
+
+      // Очищаем обьект
       this.id = null;
       this.name = null;
       this.typeWork = null;
@@ -67,6 +69,7 @@ export default {
       setTimeout(() => {
         this.showMessage = false;
       }, 2000)
+
     },
   },
 };
@@ -82,34 +85,8 @@ export default {
 
 input,
 select {
-  width: 330px;
-  height: 25px;
-}
-
-select {
-  height: 31px;
-}
-
-.v-table__add-btn {
-  background: linear-gradient(45deg, rgb(235, 119, 42), rgb(253, 156, 9));
-  color: rgb(248, 248, 248);
-  text-align: center;
-  line-height: 1.5;
-  height: 35px;
-  border: none;
-  box-shadow: none;
-  border-radius: 5px;
-  margin-left: 30px;
-  margin-top: 6px;
-  flex-basis: 15%;
-  cursor: pointer;
-  transition: 0.2s;
-  font-weight: 700;
-}
-
-.v-table__add-btn:hover {
-  flex-basis: 16%;
-  color: rgb(218, 218, 218);
+  width: 480px;
+  height: 30px;
 }
 
 .v-table__add {
@@ -130,6 +107,10 @@ select {
   display: flex;
   flex-flow: row;
   align-items: center;
+}
+
+.v-table__add-btn {
+  margin: 30px 15px;
 }
 
 .v-table__input-typeWork {
