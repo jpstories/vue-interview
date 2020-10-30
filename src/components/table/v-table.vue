@@ -49,12 +49,8 @@
             <button type="button" class="btn btn-warning btn-sm">
               Редактировать
             </button>
-            <button
-              type="button"
-              class="btn btn-danger btn-sm"
-              @click="onRemoveWorker"
-            >
-              Удалить
+            <button type="button" class="btn btn-danger btn-sm" @click="onDeleteUser(index, user)">
+              Удалить {{ user.id }}
             </button>
           </td>
         </tr>
@@ -169,20 +165,33 @@ export default {
         });
     },
 
-    addHandlerUser(userAddObj) {
-      const path = "http://localhost:3000/users";
-      // this.users.push(userAddObj);
-      axios.post(path, userAddObj).then(() => this.getUsers())
-    },
-
     pageClick(page) {
       this.pageNumber = page;
     },
 
-    onRemoveWorker(index) {
+    addHandlerUser(userAddObj) {
+      const path = "http://localhost:3000/users";
+      // this.users.push(userAddObj);
+      axios.post(path, userAddObj).then(() => this.getUsers());
+    },
+
+    deleteUser(userID) {
+      axios
+        .delete(`http://localhost:3000/users/${userID}`)
+        .then(() => {
+          this.getUsers();
+        })
+        .catch((error) => {
+          console.error(error);
+          this.getUsers();
+        });
+    },
+
+    onDeleteUser(index, user) {
       if (confirm("Вы действительно хотите удалить сотрудника?")) {
         this.users.splice(index, 1);
-
+        console.log(user);
+        this.deleteUser(user.id);
       }
     },
 
@@ -192,6 +201,7 @@ export default {
         ? this.users.sort((a, b) => a.name.localeCompare(b.name))
         : this.users.sort((a, b) => b.name.localeCompare(a.name));
     },
+
     sortByPrice() {
       this.rotatedProfit = !this.rotatedProfit;
       this.rotatedProfit
