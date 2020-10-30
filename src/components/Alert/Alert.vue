@@ -1,14 +1,23 @@
 <template>
   <div>
-    <b-alert variant="success" show>{{ message }}</b-alert>
-    <br>
+    <b-alert id="alert__view" variant="success" show>{{ message }}</b-alert>
+    <br />
   </div>
 </template>
 
 <script>
 export default {
   props: {
-      message: String
-  }
+    message: String,
+  },
 };
 </script>
+
+<style>
+#alert__view {
+  position: fixed;
+  top: 40px;
+  left: 5%;
+  width: 90%;
+}
+</style>

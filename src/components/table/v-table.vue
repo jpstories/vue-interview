@@ -8,7 +8,7 @@
             <img
               @click="sortByName"
               class="v-table__money-sort"
-              :style="rotatedName ? { transform: `rotateX(${turn}deg)` } : null"
+              :style="animation.rotatedName ? { transform: `rotateX(${animation.turn}deg)` } : null"
               src="../../assets/sort5.png"
               alt="orderName"
               v-if="users.length > 1"
@@ -24,7 +24,7 @@
               @click="sortByPrice"
               class="v-table__money-sort"
               :style="
-                rotatedProfit ? { transform: `rotateX(${turn}deg)` } : null
+                animation.rotatedProfit ? { transform: `rotateX(${animation.turn}deg)` } : null
               "
               src="../../assets/sort5.png"
               alt="orderProfit"
@@ -36,6 +36,8 @@
         </tr>
       </thead>
 
+      <alert message="Пользователь удален!" v-if="showAlert"></alert>
+
       <tbody>
         <tr v-for="(user, index) in paginatedUsers" :key="index">
           <td>{{ user.name }}</td>
@@ -46,16 +48,94 @@
             <img class="calendar" src="../../assets/calendar.png" />
           </td>
           <td>
-            <button type="button" class="btn btn-warning btn-sm">
+            <button
+              type="button"
+              class="btn btn-warning btn-sm"
+              v-b-modal.user-update-modal
+              @click="onEditUser(user)"
+            >
               Редактировать
             </button>
-            <button type="button" class="btn btn-danger btn-sm" @click="onDeleteUser(index, user)">
-              Удалить {{ user.id }}
+
+            <button
+              type="button"
+              class="btn btn-danger btn-sm"
+              @click="onDeleteUser(index, user)"
+            >
+              Удалить
             </button>
           </td>
         </tr>
       </tbody>
     </table>
+
+    <b-modal
+      ref="editUserModal"
+      id="user-update-modal"
+      title="Редактирование информации о сотруднике"
+      hide-footer
+    >
+      <b-form @submit="onSubmitUpdate" @reset="onResetUpdate" class="w-100">
+        <b-form-group
+          id="form-name-edit-group"
+          label="ФИО:"
+          label-for="form-name-edit-input"
+        >
+          <b-form-input
+            id="form-name-edit-input"
+            type="text"
+            v-model="editForm.name"
+            required
+          >
+          </b-form-input>
+        </b-form-group>
+
+        <b-form-group
+          id="form-typework-edit-group"
+          label="Тип занятости:"
+          label-for="form-typework-edit-input"
+        >
+          <b-form-input
+            id="form-typework-edit-input"
+            type="text"
+            v-model="editForm.typeWork"
+            required
+          >
+          </b-form-input>
+        </b-form-group>
+
+        <b-form-group
+          id="form-contract-edit-group"
+          label="Трудоустройство:"
+          label-for="form-contract-edit-input"
+        >
+          <b-form-input
+            id="form-contract-edit-input"
+            type="text"
+            v-model="editForm.contract"
+            required
+          >
+          </b-form-input>
+        </b-form-group>
+
+        <b-form-group
+          id="form-pay-edit-group"
+          label="Зарплата:"
+          label-for="form-pay-edit-input"
+        >
+          <b-form-input
+            id="form-pay-edit-input"
+            type="text"
+            v-model="editForm.pay"
+            required
+          >
+          </b-form-input>
+        </b-form-group>
+
+        <b-button type="submit" variant="primary">Обновить</b-button>
+        <b-button type="reset" variant="danger">Отмена</b-button>
+      </b-form>
+    </b-modal>
 
     <div class="v-table__empty" v-if="!users.length">
       <h3>Пока еще нет сотрудников :(</h3>
@@ -122,11 +202,13 @@
 <script>
 import axios from "axios";
 import VTableAdd from "./v-table-add.vue";
+import Alert from "../Alert/Alert.vue";
 
 export default {
   name: "v-table",
   components: {
     VTableAdd,
+    alert: Alert,
   },
 
   data() {
@@ -134,9 +216,19 @@ export default {
       users: [],
       usersPerPage: 10,
       pageNumber: 1,
-      rotatedProfit: false,
-      rotatedName: false,
-      turn: 180,
+      showAlert: false,
+      animation: {
+        rotatedProfit: false,
+        rotatedName: false,
+        turn: 180,
+      },
+      editForm: {
+        id: "",
+        name: "",
+        typeWork: "",
+        contract: "",
+        pay: ""
+      },
     };
   },
 
@@ -175,6 +267,45 @@ export default {
       axios.post(path, userAddObj).then(() => this.getUsers());
     },
 
+    updateBook(payload, userID) {
+      const path = `http://localhost:3000/users/${userID}`;
+      axios
+        .put(path, payload)
+        .then(() => {
+          this.getUsers();
+        })
+        .catch((error) => {
+          console.error(error);
+          this.getUsers();
+        });
+    },
+
+    onEditUser(user) {
+      this.editForm = user;
+    },
+
+    onSubmitUpdate(e) {
+      e.preventDefault();
+      this.$refs.editUserModal.hide();
+      const payload = {
+        name: this.editForm.name,
+        typeWork: this.editForm.typeWork,
+        contract: this.editForm.contract,
+      };
+      this.updateBook(payload, this.editForm.id);
+    },
+
+    onResetUpdate(e) {
+      e.preventDefault();
+      this.$refs.editUserModal.hide();
+      this.editForm.id = '';
+      this.editForm.name = '';
+      this.editForm.typeWork = '';
+      this.editForm.contract = '';
+      this.editForm.pay = '';
+      this.getUsers();
+    },
+
     deleteUser(userID) {
       axios
         .delete(`http://localhost:3000/users/${userID}`)
@@ -189,22 +320,27 @@ export default {
 
     onDeleteUser(index, user) {
       if (confirm("Вы действительно хотите удалить сотрудника?")) {
+        this.showAlert = true;
         this.users.splice(index, 1);
         console.log(user);
         this.deleteUser(user.id);
+
+        setTimeout(() => {
+          this.showAlert = false;
+        }, 2000);
       }
     },
 
     sortByName() {
-      this.rotatedName = !this.rotatedName;
-      this.rotatedName
+      this.animation.rotatedName = !this.animation.rotatedName;
+      this.animation.rotatedName
         ? this.users.sort((a, b) => a.name.localeCompare(b.name))
         : this.users.sort((a, b) => b.name.localeCompare(a.name));
     },
 
     sortByPrice() {
-      this.rotatedProfit = !this.rotatedProfit;
-      this.rotatedProfit
+      this.animation.rotatedProfit = !this.animation.rotatedProfit;
+      this.animation.rotatedProfit
         ? this.users.sort((a, b) => a.pay - b.pay)
         : this.users.sort((a, b) => b.pay - a.pay);
     },

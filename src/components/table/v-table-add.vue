@@ -26,7 +26,7 @@
 
       <button type="submit" class="btn btn-dark v-table__add-btn">Добавить</button>
     </form>
-    <alert class="alert__added" v-if="showMessage" message="Пользователь добавлен!"></alert>
+    <alert v-if="showMessage" message="Пользователь добавлен!"></alert>
   </div>
 </template>
 
@@ -49,7 +49,7 @@ export default {
   methods: {
     onSubmit() {
       const userAddObj = {
-        id: Math.ceil(Math.random(1, 4000)),
+        id: Math.ceil(Math.random(1000, 5000) * 1000),
         name: this.name,
         typeWork: this.typeWork,
         contract: this.contract,
@@ -115,11 +115,5 @@ select {
 
 .v-table__input-typeWork {
   margin-left: 22px;
-}
-.alert__added {
-  position: fixed;
-  top: 40px;
-  left: 5%;
-  width: 90%;
 }
 </style>
