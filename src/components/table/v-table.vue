@@ -45,7 +45,9 @@
           <td>{{ user.contract }}</td>
           <td>
             <span>{{ user.pay }} руб.</span>
-            <img class="calendar" src="../../assets/calendar.png" />
+            <a href="http://localhost:8080/userpayments">
+              <img class="calendar" src="../../assets/calendar.png" />
+            </a>
           </td>
           <td>
             <button

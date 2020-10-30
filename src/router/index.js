@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import VTable from '../components/table/v-table';
-import VPay from '../components/userPayment/v-pay';
+import PaymentInfo from '../components/PaymentInfo/PaymentInfo';
 
 Vue.use(Router);
 
@@ -13,9 +13,9 @@ export default new Router({
             component: VTable,
         },
         {
-            path: '/payment',
-            name: 'v-pay',
-            component: VPay,
+            path: '/userpayments',
+            name: 'PaymentInfo',
+            component: PaymentInfo,
         },
     ],
     mode: 'history',
