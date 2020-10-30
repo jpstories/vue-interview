@@ -183,6 +183,7 @@
       </svg>
     </div>
 
+    <b-button type="submit" v-b-modal.user-add-modal variant="primary">Добавить</b-button>
     <v-table-add @addHandlerUser="addHandlerUser" />
 
     <div class="v-table__pagination" v-if="users.length > 10">

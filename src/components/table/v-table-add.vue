@@ -1,33 +1,39 @@
 <template>
-  <div class="v-table__add">
-    <form @submit.prevent="onSubmit">
-      <div class="v-table__add-col">
-        <label for="fname">Ф.И.О</label>
-        <input id="fname" name="fname" v-model="name" type="text" required />
+  <div>
+    <b-modal ref="editUserModal" id="user-add-modal" title="Добавление нового сотрудника" hide-footer>
+      <b-form @submit.prevent="onSubmit" class="w-100">
+          <alert v-if="showMessage" message="Пользователь добавлен!"></alert>
+          <b-form-group id="form-name-edit-group" label="ФИО:" label-for="form-name-edit-input">
+            <b-form-input id="name" v-model="name" type="text" required></b-form-input>
+          </b-form-group>
 
-        <label for="typeWork">Тип занятости</label>
-        <select name="typeWork" id="typeWork" v-model="typeWork" required>
-          <option value="Программист-бэкенд">Программист-бэкенд</option>
-          <option value="Верстальщик">Верстальщик</option>
-          <option value="Дизайнер">Дизайнер</option>
-        </select>
-      </div>
+          <b-form-group id="form-typework-edit-group" label="Тип занятости:" label-for="form-typework-edit-input">
+            <b-form-select 
+              v-model="typeWork" 
+              :options="[{ text: 'Выберите должность', value: null }, 'Программист-бэкенд', 'Верстальщик', 'Дизайнер']"
+              size="sm" 
+              class="mt-3">
+            </b-form-select>
+          </b-form-group>
 
-      <div class="v-table__add-col">
-        <label for="contract">Трудоустройство</label>
-        <select name="contract" id="contract" v-model="contract" required>
-          <option value="Трудовой договор">Трудовой договор</option>
-          <option value="Фриланс">Фриланс</option>
-        </select>
+          <b-form-group id="form-contract-edit-group" label="Трудоустройство:" label-for="form-contract-edit-input">
+            <b-form-select 
+              v-model="contract" 
+              :options="[{ text: 'Выберите способ трудоустройства', value: null }, 'Трудовой договор', 'Фриланс']"
+              size="sm" 
+              class="mt-3">
+            </b-form-select>
+          </b-form-group>
 
-        <label for="profit">Зарплата</label>
-        <input id="profit" name="profit" v-model="pay" type="text" required />
-      </div>
+          <b-form-group id="form-pay-edit-group" label="Зарплата:" label-for="form-pay-edit-input">
+            <b-form-input id="pay" v-model="pay" type="text" required></b-form-input>
+          </b-form-group>
 
-      <button type="submit" class="btn btn-dark v-table__add-btn">Добавить</button>
-    </form>
-    <alert v-if="showMessage" message="Пользователь добавлен!"></alert>
-  </div>
+        <b-button type="submit" variant="primary">Добавить</b-button>
+      </b-form>
+    </b-modal>
+    <!-- <b-button v-b-modal.user-update-modal type="submit" variant="primary">Добавить</b-button> -->
+    </div>
 </template>
 
 <script>
@@ -74,46 +80,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.v-table__add-col {
-  display: flex;
-  flex-flow: column;
-  align-items: flex-start;
-  margin-left: 15px;
-}
-
-input,
-select {
-  width: 480px;
-  height: 30px;
-}
-
-.v-table__add {
-  width: 95%;
-  height: max-content;
-  background: rgb(230, 19, 82);
-  color: rgb(238, 238, 238);
-  padding: 15px;
-  box-sizing: border-box;
-  display: flex;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  margin: 0 auto;
-  box-shadow: 0 2px 3px rgb(58, 58, 58);
-}
-
-.v-table__add form {
-  display: flex;
-  flex-flow: row;
-  align-items: center;
-}
-
-.v-table__add-btn {
-  margin: 30px 15px;
-}
-
-.v-table__input-typeWork {
-  margin-left: 22px;
-}
-</style>
