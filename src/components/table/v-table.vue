@@ -44,10 +44,10 @@
           <td>{{ user.typeWork }}</td>
           <td>{{ user.contract }}</td>
           <td>
-            <span>{{ user.pay }} руб.</span>
-            <a href="http://localhost:8080/userpayments">
+            <span>{{ user.pay.g2020[0] }} руб.</span>
+            <router-link to="/userinfo">
               <img class="calendar" src="../../assets/calendar.png" />
-            </a>
+            </router-link>
           </td>
           <td>
             <button
@@ -220,6 +220,7 @@ export default {
       usersPerPage: 10,
       pageNumber: 1,
       showAlert: false,
+      currencyYear: new Date().getFullYear(),
       animation: {
         rotatedProfit: false,
         rotatedName: false,
@@ -344,7 +345,7 @@ export default {
     sortByPrice() {
       this.animation.rotatedProfit = !this.animation.rotatedProfit;
       this.animation.rotatedProfit
-        ? this.users.sort((a, b) => a.pay - b.pay)
+        ? this.users.sort((a, b) => a.pay.g2020[0] - b.pay.g2020[0])
         : this.users.sort((a, b) => b.pay - a.pay);
     },
   },
