@@ -45,9 +45,10 @@
           <td>{{ user.contract }}</td>
           <td>
             <span>{{ user.pay.g2020[0] }} руб.</span>
-            <router-link to="/userinfo">
+            <router-link to="/user/:id">
               <img class="calendar" src="../../assets/calendar.png" />
             </router-link>
+            <!-- <a href="#" :id="user.id">{{user.id}}</a> -->
           </td>
           <td>
             <button
@@ -346,12 +347,13 @@ export default {
       this.animation.rotatedProfit = !this.animation.rotatedProfit;
       this.animation.rotatedProfit
         ? this.users.sort((a, b) => a.pay.g2020[0] - b.pay.g2020[0])
-        : this.users.sort((a, b) => b.pay - a.pay);
+        : this.users.sort((a, b) => b.pay.g2020[0] - a.pay.g2020[0]);
     },
   },
 
   created() {
     this.getUsers();
+    console.log('created')
   },
 };
 </script>

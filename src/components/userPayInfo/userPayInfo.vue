@@ -5,7 +5,8 @@
         <b-button variant="outline-primary" href="/">&larr; Назад</b-button>
       </router-link>
 
-      <b-jumbotron>
+      <b-jumbotron class="payment__user-head__card">
+        <h2>ID: {{ $route.params.id }}</h2>
         <h2>{{ user.name }}</h2>
         <p>{{ user.typeWork }}</p>
         <p>{{ user.contract }}</p>
@@ -14,17 +15,18 @@
       <div>
         <img src="../../assets/vallet.png" alt="" width="128" />
         <h4>Доходы сотрудника</h4>
+        <p><b>(в рублях)</b></p>
       </div>
 
       <div class="payment__choose-year">
-          <span>Год:</span>
-          <b-form-select
-            selected="2020"
-            :options="['2018', '2019', '2020']"
-            size="sm"
-            class="mt-3"
-          >
-          </b-form-select>
+        <span>Год:</span>
+        <b-form-select
+          v-model="selected"
+          :options="options"
+          size="sm"
+          class="mt-3"
+        >
+        </b-form-select>
       </div>
     </div>
 
@@ -42,16 +44,29 @@
         <div class="payment__year-month">Октябрь</div>
         <div class="payment__year-month">Ноябрь</div>
         <div class="payment__year-month">Декабрь</div>
+        <div class="payment__year-month payment__year-actions"></div>
       </div>
 
       <div class="payment__year payment__year-body">
         <div
           class="payment__year-month"
-          v-for="(year, index) in user.pay.g2020"
+          v-for="(arr, index) in user.pay.g2020"
           :key="index"
         >
-          {{ year }} руб.
+          {{ arr }}
         </div>
+
+        <button type="button" class="btn btn-warning btn-sm">
+          Редактировать
+        </button>
+
+        <button
+          @click="onDeleteUserPay(user.pay.g2020)"
+          type="button"
+          class="btn btn-danger btn-sm"
+        >
+          Удалить
+        </button>
       </div>
 
       <b-button
@@ -72,19 +87,30 @@
           <b>{{ sumAfterTax }} рублей (после вычета НДФЛ 13%)</b>
         </p>
 
-        <b-button @click="closeCheckout" href="#" variant="primary">Создать отчет</b-button>
+        <b-button @click="closeCheckout" href="#" variant="primary"
+          >Создать отчет</b-button
+        >
 
         <b-button
           @click="openConverter"
           v-if="checkoutShow"
           type="button"
           variant="info"
-          >Конвертировать</b-button>
+          >Конвертировать</b-button
+        >
 
         <div class="converter" v-if="converterShow">
-          <img src="https://www.buybitcoinworldwide.com/img/goodicons/exchange.png" alt="" width="300">
-          <b-button @click="convertEuro" variant="primary">&euro; Евро</b-button>
-          <b-button @click="convertDollar" variant="primary">$ Доллары</b-button>
+          <img
+            src="../../assets/exchange.png"
+            alt=""
+            width="300"
+          />
+          <b-button @click="convertEuro" variant="primary"
+            >&euro; Евро</b-button
+          >
+          <b-button @click="convertDollar" variant="primary"
+            >$ Доллары</b-button
+          >
 
           <div class="converterTotal">
             <div v-if="dollarhandle">
@@ -101,65 +127,40 @@
 </template>
 
 <script>
+import axios from "axios";
 export default {
   name: "userPayInfo",
-  data: () => ({
-    user: {
-      name: "Горячая Анастасия Евгеньевна",
-      typeWork: "Дизайнер",
-      contract: "Трудовой договор",
-      pay: {
-        g2020: [
-          50000,
-          50000,
-          60000,
-          65000,
-          65000,
-          66000,
-          70000,
-          80000,
-          90000,
-          115000,
-          110000,
-          102000,
-        ],
-        g2019: [
-          30000,
-          31500,
-          35000,
-          35500,
-          36700,
-          36750,
-          36780,
-          37500,
-          37600,
-          45000,
-          46000,
-          47600,
-        ],
-      },
-    },
-    reducer: null,
-    sumBeforeTax: null,
-    sumAfterTax: null,
-    sumAfterDollar: null,
-    sumAfterEuro: null,
-    checkoutShow: false,
-    converterShow: false,
-    ndfl: 13,
-    currencyCourseDollar: 79.37,
-    currencyCourseEuro: 92.69,
-    eurohandle: false,
-    dollarhandle: false,
-  }),
+  data() {
+    return {
+      user: {},
+      currencyYear: new Date().getFullYear(),
+      selected: null,
+      options: [
+        { text: `Текущий: ${new Date().getFullYear()}`, value: null },
+        { text: "2019", value: 1 },
+        { text: "2018", value: 2 },
+      ],
+      checkoutShow: false,
+      converterShow: false,
+      ndfl: 13,
+      sumBeforeTax: null,
+      sumAfterTax: null,
+      sumAfterEuro: null,
+      sumAfterDollar: null,
+      currencyCourseDollar: 80,
+      currencyCourseEuro: 90,
+      dollarhandle: false,
+      eurohandle: false
+    };
+  },
+  props: ["id"],
   methods: {
     onCheckoutPayments(arr) {
       let reducer = (acc, cur) => acc + cur;
       this.sumBeforeTax = arr.reduce(reducer);
       return (
-        (this.sumAfterTax =
-          this.sumBeforeTax - (this.sumBeforeTax * this.ndfl) / 100),
-        (this.checkoutShow = true)
+        this.sumAfterTax = Math.ceil(this.sumBeforeTax - (this.sumBeforeTax * this.ndfl) / 100, 2),
+        this.checkoutShow = true
       );
     },
     closeCheckout() {
@@ -176,6 +177,43 @@ export default {
     openConverter() {
       this.converterShow = true;
     },
+
+    deleteUserPay() {
+      if (confirm("Вы действительно хотите удалить информацию о доходе?")) {
+        // axios
+        //   .delete(`http://localhost:3000/users/5626/${pay}`)
+        //   .then(() => {
+        //     this.getUsers();
+        //   })
+        //   .catch((error) => {
+        //     console.error(error);
+        //     this.getUsers();
+        //   });
+        this.user.pay.g2020 = []
+      }
+    },
+
+    onDeleteUserPay() {
+      if (confirm("Вы действительно хотите удалить сотрудника?")) {
+        this.deleteUserPay();
+      }
+    },
+
+    getUsers() {
+      const path = "http://localhost:3000/users";
+      axios
+        .get(path)
+        .then((res) => {
+          this.user = res.data.find((item) => item.id === "5626");
+          console.log(this.user);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+  },
+  created() {
+    this.getUsers();
   },
 };
 </script>
@@ -263,5 +301,13 @@ export default {
   margin-top: 17px;
   margin-right: 10px;
   font-size: 1.1em;
+}
+
+.payment__year-actions {
+  width: 220px;
+}
+
+.payment__user-head__card {
+  height: 250px;
 }
 </style>

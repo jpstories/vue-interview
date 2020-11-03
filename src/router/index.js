@@ -13,9 +13,10 @@ export default new Router({
             component: VTable,
         },
         {
-            path: '/userinfo',
+            path: '/user/:id',
             name: 'userPayInfo',
             component: userPayInfo,
+            props: true
         },
     ],
     mode: 'history',
