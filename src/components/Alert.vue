@@ -19,5 +19,6 @@ export default {
   top: 40px;
   left: 5%;
   width: 90%;
+  z-index: 9999;
 }
 </style>

@@ -1,5 +1,19 @@
 <template>
   <div class="v-table">
+    <span v-if="sortLoading">Загрузка.........</span>
+    <div class="v-table-filter">
+      <label for="input-live">Показать сотрудников с зарплатой менее:</label>
+      <b-form-input
+        id="sortbyprice" 
+        type="text" 
+        value="200000"
+        v-model.number="maxPrice"
+        @input="setRangeSlider"
+        placeholder="Введите значение"
+      >
+      </b-form-input>
+    </div>
+
     <table class="table table-hover">
       <thead>
         <tr>
@@ -36,19 +50,18 @@
         </tr>
       </thead>
 
-      <alert message="Пользователь удален!" v-if="showAlert"></alert>
+      <Alert message="Пользователь удален!" v-if="showAlert"></Alert>
 
       <tbody>
-        <tr v-for="(user, index) in paginatedUsers" :key="index">
+        <tr v-for="(user, index) in filteredProducts" :key="index">
           <td>{{ user.name }}</td>
           <td>{{ user.typeWork }}</td>
           <td>{{ user.contract }}</td>
           <td>
-            <span>{{ user.pay.g2020[0] }} руб.</span>
-            <router-link to="/user/:id">
+            <span>{{ user.pay[0] | formattedPrice}} ₽</span>
+            <router-link :to="{name: 'details', params: { userID: user.id }}">
               <img class="calendar" src="../../assets/calendar.png" />
             </router-link>
-            <!-- <a href="#" :id="user.id">{{user.id}}</a> -->
           </td>
           <td>
             <button
@@ -77,6 +90,9 @@
       id="user-update-modal"
       title="Редактирование информации о сотруднике"
       hide-footer
+      header-bg-variant="primary"
+      header-text-variant="light"
+      :no-close-on-backdrop="true"
     >
       <b-form @submit="onSubmitUpdate" @reset="onResetUpdate" class="w-100">
         <b-form-group
@@ -93,54 +109,42 @@
           </b-form-input>
         </b-form-group>
 
-        <b-form-group
-          id="form-typework-edit-group"
-          label="Тип занятости:"
-          label-for="form-typework-edit-input"
-        >
-          <b-form-input
-            id="form-typework-edit-input"
-            type="text"
-            v-model="editForm.typeWork"
-            required
-          >
-          </b-form-input>
-        </b-form-group>
+          <b-form-group id="form-typework-edit-group" label="Тип занятости:" label-for="form-typework-edit-input">
+            <b-form-select 
+              v-model="editForm.typeWork"
+              :options="[{ text: 'Выберите должность', value: null }, 'Программист-бэкенд', 'Верстальщик', 'Дизайнер']"
+              size="sm" 
+              class="mt-3"
+              required>
+            </b-form-select>
+          </b-form-group>
 
-        <b-form-group
-          id="form-contract-edit-group"
-          label="Трудоустройство:"
-          label-for="form-contract-edit-input"
-        >
-          <b-form-input
-            id="form-contract-edit-input"
-            type="text"
-            v-model="editForm.contract"
-            required
-          >
-          </b-form-input>
-        </b-form-group>
+          <b-form-group id="form-contract-edit-group" label="Трудоустройство:" label-for="form-contract-edit-input">
+            <b-form-select 
+              v-model="editForm.contract" 
+              :options="[{ text: 'Выберите способ трудоустройства', value: null }, 'Трудовой договор', 'Фриланс']"
+              size="sm" 
+              class="mt-3"
+              required>
+            </b-form-select>
+          </b-form-group>
 
-        <b-form-group
-          id="form-pay-edit-group"
-          label="Зарплата:"
-          label-for="form-pay-edit-input"
-        >
-          <b-form-input
-            id="form-pay-edit-input"
-            type="text"
-            v-model="editForm.pay"
-            required
-          >
-          </b-form-input>
-        </b-form-group>
+      
+          <b-form-group label="Зарплата (₽)" id="form-pay-edit-group" label-for="form-pay-edit-input">
+              <b-form-input
+                id="form-pay-edit-input"
+                type="text"
+                v-model="editForm.pay[0]"
+                required 
+              />
+          </b-form-group>
 
-        <b-button type="submit" variant="primary">Обновить</b-button>
-        <b-button type="reset" variant="danger">Отмена</b-button>
+          <b-button type="submit" variant="primary">Обновить</b-button>
+          <b-button type="reset" variant="danger">Отмена</b-button>
       </b-form>
     </b-modal>
 
-    <div class="v-table__empty" v-if="!users.length">
+    <div class="v-table__empty" v-if="!sortedUsersByPrice.length && maxPrice!=200000 && maxPrice!=false">
       <h3>Пока еще нет сотрудников :(</h3>
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -187,7 +191,8 @@
     </div>
 
     <b-button type="submit" v-b-modal.user-add-modal variant="primary">Добавить</b-button>
-    <v-table-add @addHandlerUser="addHandlerUser" />
+
+    <UserAdd @addHandlerUser="addHandlerUser"></UserAdd>
 
     <div class="v-table__pagination" v-if="users.length > 10">
       <div
@@ -205,16 +210,19 @@
 
 <script>
 import axios from "axios";
-import VTableAdd from "./v-table-add.vue";
-import Alert from "../Alert/Alert.vue";
+import UserAdd from "../UserAdd/UserAdd";
+import Alert from "../Alert.vue";
+import formattedPrice from "../../filters/price-format";
 
 export default {
-  name: "v-table",
+  name: "UserTable",
   components: {
-    VTableAdd,
-    alert: Alert,
+    UserAdd,
+    Alert,
   },
-
+  filters: {
+    formattedPrice
+  },
   data() {
     return {
       users: [],
@@ -232,8 +240,11 @@ export default {
         name: "",
         typeWork: "",
         contract: "",
-        pay: ""
+        pay: [null, 0,0,0,0,0,0,0,0,0,0,0]
       },
+      sortedUsersByPrice: [],
+      maxPrice: '',
+      sortLoading: false,
     };
   },
 
@@ -241,10 +252,24 @@ export default {
     pages() {
       return Math.ceil(this.users.length / 10);
     },
+
     paginatedUsers() {
       let from = (this.pageNumber - 1) * this.usersPerPage;
       let to = from + this.usersPerPage;
       return this.users.slice(from, to);
+    },
+
+    filteredProducts() {
+      if (!this.maxPrice) {
+        return this.users
+      }
+      if (this.sortedUsersByPrice.length) {
+        return this.sortedUsersByPrice
+      } else if (this.maxPrice === 200000){
+        return this.users
+      } else {
+        return []
+      }
     },
   },
 
@@ -255,7 +280,6 @@ export default {
         .get(path)
         .then((res) => {
           this.users = res.data;
-          console.log(res.data);
         })
         .catch((error) => {
           console.error(error);
@@ -268,20 +292,24 @@ export default {
 
     addHandlerUser(userAddObj) {
       const path = "http://localhost:3000/users";
-      // this.users.push(userAddObj);
-      axios.post(path, userAddObj).then(() => this.getUsers());
+      axios.post(path, userAddObj).then(() => {
+        this.getUsers();
+        this.sortByCategories();
+      })
     },
 
-    updateBook(payload, userID) {
+    updateUser(payload, userID) {
       const path = `http://localhost:3000/users/${userID}`;
       axios
         .put(path, payload)
         .then(() => {
           this.getUsers();
+          this.sortByCategories();
         })
         .catch((error) => {
           console.error(error);
           this.getUsers();
+          this.sortByCategories();
         });
     },
 
@@ -296,19 +324,14 @@ export default {
         name: this.editForm.name,
         typeWork: this.editForm.typeWork,
         contract: this.editForm.contract,
+        pay: this.editForm.pay
       };
-      this.updateBook(payload, this.editForm.id);
+      this.updateUser(payload, this.editForm.id);
     },
 
     onResetUpdate(e) {
       e.preventDefault();
       this.$refs.editUserModal.hide();
-      this.editForm.id = '';
-      this.editForm.name = '';
-      this.editForm.typeWork = '';
-      this.editForm.contract = '';
-      this.editForm.pay = '';
-      this.getUsers();
     },
 
     deleteUser(userID) {
@@ -316,10 +339,12 @@ export default {
         .delete(`http://localhost:3000/users/${userID}`)
         .then(() => {
           this.getUsers();
+          this.sortByCategories();
         })
         .catch((error) => {
           console.error(error);
           this.getUsers();
+          this.sortByCategories();
         });
     },
 
@@ -327,7 +352,7 @@ export default {
       if (confirm("Вы действительно хотите удалить сотрудника?")) {
         this.showAlert = true;
         this.users.splice(index, 1);
-        console.log(user);
+        // console.log(user);
         this.deleteUser(user.id);
 
         setTimeout(() => {
@@ -337,88 +362,73 @@ export default {
     },
 
     sortByName() {
-      this.animation.rotatedName = !this.animation.rotatedName;
-      this.animation.rotatedName
+      if (this.sortedUsersByPrice.length) {
+        this.animation.rotatedName = !this.animation.rotatedName;
+        this.animation.rotatedName
+        ? this.sortedUsersByPrice.sort((a, b) => a.name.localeCompare(b.name))
+        : this.sortedUsersByPrice.sort((a, b) => b.name.localeCompare(a.name))
+      } else {
+        this.animation.rotatedName = !this.animation.rotatedName;
+        this.animation.rotatedName
         ? this.users.sort((a, b) => a.name.localeCompare(b.name))
         : this.users.sort((a, b) => b.name.localeCompare(a.name));
+      }
     },
 
     sortByPrice() {
-      this.animation.rotatedProfit = !this.animation.rotatedProfit;
-      this.animation.rotatedProfit
-        ? this.users.sort((a, b) => a.pay.g2020[0] - b.pay.g2020[0])
-        : this.users.sort((a, b) => b.pay.g2020[0] - a.pay.g2020[0]);
+      if (this.sortedUsersByPrice.length) {
+        this.animation.rotatedProfit = !this.animation.rotatedProfit;
+        this.animation.rotatedProfit
+          ? this.sortedUsersByPrice.sort((a, b) => a.pay[0] - b.pay[0])
+          : this.sortedUsersByPrice.sort((a, b) => b.pay[0] - a.pay[0]);
+      } else {
+        this.animation.rotatedProfit = !this.animation.rotatedProfit;
+        this.animation.rotatedProfit
+          ? this.users.sort((a, b) => a.pay[0] - b.pay[0])
+          : this.users.sort((a, b) => b.pay[0] - a.pay[0]);
+      }
+    },
+
+    setRangeSlider() {
+      this.sortLoading = true;
+      if (this.maxPrice) {
+        console.log(this.maxPrice)
+      }
+      this.sortByCategories();
+      this.sortLoading = false;
+    },
+
+    sortByCategories() {
+      let vm = this;
+      this.sortedUsersByPrice = [...this.users]
+      this.sortedUsersByPrice = this.sortedUsersByPrice.filter(function (item) {
+        return item.pay[0] <= vm.maxPrice
+      })
     },
   },
 
-  created() {
+  mounted() {
     this.getUsers();
-    console.log('created')
+    this.sortByCategories();
+    console.log('mounted');
   },
 };
 </script>
 
 <style scoped>
-.v-table {
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
-.v-table__pagination {
+@import "./UserTable.css";
+.v-table-filter {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 15px;
-}
-
-.v-table__empty {
-  min-height: 100px;
-  display: flex;
-  flex-flow: column;
+  flex-flow: row;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
+  padding: 15px;
 }
-
-.v-table__empty svg {
-  width: 150px;
-  height: 150px;
+.v-table-filter label {
+  margin-right: 5px;
+  margin-top: 5px;
 }
-
-.v-table img {
-  width: 26px;
-  height: 30px;
-  cursor: pointer;
-  margin-left: 5px;
-}
-
-.v-table img:hover {
-  transform: scale(0.9);
-}
-
-.v-table__money-sort {
-  transition: 0.2s;
-  width: 30px !important;
-}
-
-.page {
-  padding: 8px;
-  border: 1px solid #e7e7e7;
-  margin-right: 15px;
-}
-.page:hover {
-  background: #accccc;
-  cursor: pointer;
-  color: white;
-}
-.page__selected {
-  background: #accccc;
-  cursor: pointer;
-  color: white;
-}
-.calendar {
-  cursor: pointer;
-}
-.table thead th {
-  vertical-align: top !important;
+.v-table-filter input {
+  width: 200px !important;
 }
 </style>
