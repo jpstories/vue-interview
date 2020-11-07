@@ -1,6 +1,10 @@
 <template>
   <div class="payment">
-    <div class="payment__info">
+    <loading transition="fade" :active.sync="isLoading" 
+        :is-full-page="fullPage">
+    </loading>
+
+    <div class="payment__info" v-if="!isLoading">
       <div class="payment__user-head">
         <router-link to="/">
           <b-button variant="outline-primary" href="/">&larr; Назад</b-button>
@@ -66,7 +70,7 @@
           </button>
 
           <button
-            @click="onDeleteUserPay(user.id)"
+            @click="onDeletePaymentUser(user.pay)"
             type="button"
             class="btn btn-danger btn-sm"
           >
@@ -76,8 +80,9 @@
       </div>
 
       <b-modal
+        v-if="editOn"
         size="xl"
-        ref="editUserModal"
+        ref="editPayUserModal"
         id="user-payments-update-modal"
         title="Редактирование информации о доходах сотрудника"
         hide-footer
@@ -85,7 +90,7 @@
         header-text-variant="light"
         :no-close-on-backdrop="true"
       >
-        <b-form class="w-100">
+        <b-form class="w-100" @submit="onSubmitUpdatePay" @reset="onResetUpdatePay">
           <div class="payment__table">
             <div class="payment__year payment__year-head">
               <div class="payment__year-month">Январь</div>
@@ -107,7 +112,6 @@
               <b-form-input
                 v-for="(payment, index) in user.pay"
                 :key="index"
-                id="form-payment-edit-input"
                 type="text"
                 v-model="editPayForm.initPay[index]"
                 required
@@ -121,7 +125,7 @@
       </b-modal>
     </div>
 
-    <div class="payment__checkout">
+    <div class="payment__checkout" v-if="!isLoading">
       <b-button
         @click="onCheckoutPayments(user.pay)"
         type="button"
@@ -178,11 +182,15 @@
 <script>
 import axios from "axios";
 import vallets from "../../data/vallets.js";
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
 
 export default {
   name: "userPayInfo",
   data() {
     return {
+      isLoading: false,
+      fullPage: true,
       users: [],
       user: {},
       currencyYear: new Date().getFullYear(),
@@ -195,6 +203,7 @@ export default {
       editPayForm: {
         initPay: [0,0,0,0,0,0,0,0,0,0,0,0]
       },
+      editOn: false,
       //handles
       checkoutShow: false,
       converterShow: false,
@@ -208,9 +217,13 @@ export default {
       sumAfterDollar: Number,
     };
   },
+  components: {
+    Loading
+  },
   props: {},
   methods: {
     onCheckoutPayments(arr) {
+      this.isLoading = true;
       if(this.user.contract === "Фриланс") {
         this.ndfl = 6
       } else {
@@ -220,7 +233,8 @@ export default {
       this.sumBeforeTax = arr.reduce(reducer);
       return (
         this.sumAfterTax = Math.ceil(this.sumBeforeTax - (this.sumBeforeTax * this.ndfl) / 100, 2),
-        this.checkoutShow = true
+        this.checkoutShow = true,
+        setTimeout(() => {this.isLoading = false}, 100)
       );
     },
     closeCheckout() {
@@ -238,63 +252,83 @@ export default {
       this.converterShow = true;
     },
 
-    onDeleteUserPay(id) {
-      if (confirm("Вы действительно хотите удалить информацию о доходе?")) {
+    deletePaymentUser(payload) {
+      if (confirm("Вы действительно хотите удалить информацию о доходе сотрудника?")) {
+        const path = `http://localhost:3000/users/${this.user.id}`;
         axios
-          .put(`http://localhost:3000/users/${id}`)
+          .put(path, payload)
           .then(() => {
-            this.user.pay = new Array(12).fill(0)
             this.getUsers();
           })
           .catch((error) => {
             console.error(error);
             this.getUsers();
           });
-        // this.user.pay.g2020 = new Array(12).fill(0)
       }
+    },
+    onDeletePaymentUser() {
+      const payload = {
+        name: this.user.name,
+        typeWork: this.user.typeWork,
+        contract: this.user.contract,
+        pay: this.editPayForm.initPay
+      };
+      this.deletePaymentUser(payload);
     },
 
     getUsers() {
+      this.isLoading = true;
       const path = "http://localhost:3000/users";
       axios
         .get(path)
         .then((res) => {
           this.users = res.data;
           this.user = this.users.find(item => item.id === this.$route.params.userID);
-          console.log(this.user.pay)
+          setTimeout(() => {
+            this.isLoading = false;
+          }, 50)
+          // this.isLoading = false;
         })
         .catch((error) => {
           console.error(error);
         });
     },
 
-    // updateUserPay(payload, userID) {
-    //   const path = `http://localhost:3000/users/${userID}`;
-    //   axios
-    //     .put(path, payload)
-    //     .then(() => {
-    //       this.getUsers();
-    //       this.sortByCategories();
-    //     })
-    //     .catch((error) => {
-    //       console.error(error);
-    //       this.getUsers();
-    //       this.sortByCategories();
-    //     });
-    // },
-
-    onEditPaymentUser(payArray) {
-      this.editPayForm.initPay = payArray;
+    updateUserPay(payload) {
+      const path = `http://localhost:3000/users/${this.user.id}`;
+      axios
+        .put(path, payload)
+        .then(() => {
+          this.getUsers();
+        })
+        .catch((error) => {
+          console.error(error);
+          this.getUsers();
+        });
     },
 
-    // onSubmitUpdate(e) {
-    //   e.preventDefault();
-    //   this.$refs.editUserModal.hide();
-    //   const payload = {
-    //     pay: this.editPayForm.pay
-    //   };
-    //   this.updateUserPay(payload, this.user.id);
-    // },
+    onEditPaymentUser(currencyPaymentArr) {
+      this.editOn = true;
+      this.editPayForm.initPay = currencyPaymentArr;
+    },
+
+    onSubmitUpdatePay(e) {
+      e.preventDefault();
+      this.$refs.editPayUserModal.hide();
+      const payload = {
+        name: this.user.name,
+        typeWork: this.user.typeWork,
+        contract: this.user.contract,
+        pay: this.editPayForm.initPay
+      };
+      this.updateUserPay(payload);
+      this.editOn = false;
+    },
+
+    onResetUpdatePay(e) {
+      e.preventDefault();
+      this.$refs.editPayUserModal.hide();
+    },
   },
   mounted() {
     this.getUsers();

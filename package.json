@@ -13,6 +13,7 @@
     "core-js": "^3.6.5",
     "json-server": "^0.16.2",
     "vue": "^2.6.11",
+    "vue-loading-overlay": "^3.4.2",
     "vue-router": "^3.4.8",
     "vuex": "^3.5.1"
   },

@@ -1,6 +1,8 @@
 <template>
   <div class="v-table">
-    <span v-if="sortLoading">Загрузка.........</span>
+    <loading transition="fade" :active.sync="isLoading" 
+        :is-full-page="fullPage">
+    </loading>
     <div class="v-table-filter">
       <label for="input-live">Показать сотрудников с зарплатой менее:</label>
       <b-form-input
@@ -14,7 +16,7 @@
       </b-form-input>
     </div>
 
-    <table class="table table-hover">
+    <table class="table table-hover" v-if="!isLoading">
       <thead>
         <tr>
           <th scope="col">
@@ -190,7 +192,7 @@
       </svg>
     </div>
 
-    <b-button type="submit" v-b-modal.user-add-modal variant="primary">Добавить</b-button>
+    <b-button type="submit" v-b-modal.user-add-modal variant="primary" v-if="!isLoading">Добавить</b-button>
 
     <UserAdd @addHandlerUser="addHandlerUser"></UserAdd>
 
@@ -214,17 +216,23 @@ import UserAdd from "../UserAdd/UserAdd";
 import Alert from "../Alert.vue";
 import formattedPrice from "../../filters/price-format";
 
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
+
 export default {
   name: "UserTable",
   components: {
     UserAdd,
     Alert,
+    Loading
   },
   filters: {
     formattedPrice
   },
   data() {
     return {
+      isLoading: false,
+      fullPage: true,
       users: [],
       usersPerPage: 10,
       pageNumber: 1,
@@ -244,7 +252,6 @@ export default {
       },
       sortedUsersByPrice: [],
       maxPrice: '',
-      sortLoading: false,
     };
   },
 
@@ -275,11 +282,15 @@ export default {
 
   methods: {
     getUsers() {
+      this.isLoading = true;
       const path = "http://localhost:3000/users";
       axios
         .get(path)
         .then((res) => {
           this.users = res.data;
+          setTimeout(() => {
+            this.isLoading = false;
+          }, 50)
         })
         .catch((error) => {
           console.error(error);
@@ -390,12 +401,10 @@ export default {
     },
 
     setRangeSlider() {
-      this.sortLoading = true;
       if (this.maxPrice) {
         console.log(this.maxPrice)
       }
       this.sortByCategories();
-      this.sortLoading = false;
     },
 
     sortByCategories() {
