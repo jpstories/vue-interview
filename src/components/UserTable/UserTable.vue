@@ -7,7 +7,7 @@
       <label for="input-live">Показать сотрудников с зарплатой менее:</label>
       <b-form-input
         id="sortbyprice" 
-        type="text" 
+        type="number" 
         value="200000"
         v-model.number="maxPrice"
         @input="setRangeSlider"
@@ -16,7 +16,7 @@
       </b-form-input>
     </div>
 
-    <table class="table table-hover" v-if="!isLoading">
+    <table class="table table-hover">
       <thead>
         <tr>
           <th scope="col">
@@ -51,8 +51,10 @@
           <th></th>
         </tr>
       </thead>
-
-      <Alert message="Пользователь удален!" v-if="showAlert"></Alert>
+      
+      <transition name="slide-fade">
+        <Alert message="Пользователь удален!" v-if="showAlert"></Alert>
+      </transition>
 
       <tbody>
         <tr v-for="(user, index) in filteredProducts" :key="index">
@@ -135,8 +137,8 @@
           <b-form-group label="Зарплата (₽)" id="form-pay-edit-group" label-for="form-pay-edit-input">
               <b-form-input
                 id="form-pay-edit-input"
-                type="text"
-                v-model="editForm.pay[0]"
+                type="number"
+                v-model.number="editForm.pay[0]"
                 required 
               />
           </b-form-group>
@@ -439,5 +441,10 @@ export default {
 }
 .v-table-filter input {
   width: 200px !important;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 </style>

@@ -10,16 +10,16 @@
           <b-button variant="outline-primary" href="/">&larr; Назад</b-button>
         </router-link>
 
-        <b-jumbotron class="payment__user-head__card" bg-variant="light" text-variant="dark">
-          <h2>{{ user.name }}</h2>
-          <p>{{ user.typeWork }}</p>
-          <p>{{ user.contract }}</p>
-        </b-jumbotron>
-
-        <div>
+        <div class="payment__user-head__logo">
           <img src="../../assets/vallet.png" alt="" width="128" />
           <h4>Доходы сотрудника</h4>
-          <p><b>(в рублях)</b></p>
+          <p><b>Валюта: <span>₽</span></b></p>
+        </div>
+
+        <div class="payment__user-head__card" bg-variant="light" text-variant="dark">
+          <h2>{{ user.name }}</h2>
+          <p><b>Занятость:</b> {{ user.typeWork }} (налог <i> {{this.ndfl}} %</i>)</p>
+          <p><b>Договор:</b> {{ user.contract }}</p>
         </div>
 
         <div class="payment__choose-year">
@@ -36,7 +36,7 @@
 
       <div class="payment__table">
         <div class="payment__year payment__year-head">
-          <div class="payment__year-month">Январь</div>
+          <div class="payment__year-month current__month">Январь</div>
           <div class="payment__year-month">Февраль</div>
           <div class="payment__year-month">Март</div>
           <div class="payment__year-month">Апрель</div>
@@ -93,7 +93,7 @@
         <b-form class="w-100" @submit="onSubmitUpdatePay" @reset="onResetUpdatePay">
           <div class="payment__table">
             <div class="payment__year payment__year-head">
-              <div class="payment__year-month">Январь</div>
+              <div class="payment__year-month current__month">Январь</div>
               <div class="payment__year-month">Февраль</div>
               <div class="payment__year-month">Март</div>
               <div class="payment__year-month">Апрель</div>
@@ -112,7 +112,7 @@
               <b-form-input
                 v-for="(payment, index) in user.pay"
                 :key="index"
-                type="text"
+                type="number"
                 v-model="editPayForm.initPay[index]"
                 required
               />
@@ -140,41 +140,57 @@
           <b>{{ sumAfterTax }} ₽ (после вычета налога {{this.ndfl}} %)</b>
         </p>
 
-        <b-button @click="closeCheckout" href="#" variant="primary"
+        <b-button size="sm" @click="closeCheckout" href="#" variant="primary"
           >Создать отчет</b-button
         >
 
         <b-button
+          size="sm"
           @click="openConverter"
           v-if="checkoutShow"
           type="button"
           variant="info"
+          v-b-modal.converter-modal
           >Конвертировать</b-button
         >
-
-        <div class="converter" v-if="converterShow">
-          <img
-            src="../../assets/exchange.png"
-            alt=""
-            width="300"
-          />
-          <b-button @click="convertEuro" variant="primary"
-            >&euro; Евро</b-button
-          >
-          <b-button @click="convertDollar" variant="primary"
-            >$ Доллары</b-button
-          >
-
-          <div class="converterTotal">
-            <div v-if="dollarhandle">
-              В долларах: {{ Math.ceil(sumAfterDollar) }} $
-            </div>
-            <div v-if="eurohandle">
-              В евро: {{ Math.ceil(sumAfterEuro) }} &euro;
-            </div>
-          </div>
-        </div>
       </b-jumbotron>
+
+      <b-modal
+        id="converter-modal"
+        title="Конвертер"
+        header-bg-variant="primary"
+        header-text-variant="light"
+        :no-close-on-backdrop="true"
+        hide-footer
+      >
+        <div class="converter" v-if="converterShow">
+            <div class="converter__title">
+              <span>Перевести начисления в размере:</span>
+              <span class="converter__title-price" ><b>{{ sumAfterTax }} ₽</b></span>
+            </div>
+
+            <img
+              src="../../assets/exchange.png"
+              alt=""
+              width="300"
+            />
+
+            <div class="converter__actions">
+              <b-button @click="convertEuro" variant="primary">&euro; Евро</b-button>
+              <b-button @click="convertDollar" variant="primary">$ Доллары</b-button>
+            </div>
+
+            <div class="converter__total">
+              <div v-if="dollarhandle">
+                В долларах: <b>{{ Math.ceil(sumAfterDollar) }} $</b>
+              </div>
+              <div v-if="eurohandle">
+                В евро: <b>{{ Math.ceil(sumAfterEuro) }} &euro;</b>
+              </div>
+            </div>
+        </div>
+      </b-modal>
+
     </div>
   </div>
 </template>
@@ -287,7 +303,7 @@ export default {
           setTimeout(() => {
             this.isLoading = false;
           }, 50)
-          // this.isLoading = false;
+          this.setupNdfl();
         })
         .catch((error) => {
           console.error(error);
@@ -312,6 +328,13 @@ export default {
       this.editPayForm.initPay = currencyPaymentArr;
     },
 
+    clearValletCheckout() {
+      this.sumAfterEuro = null;
+      this.sumAfterDollar = null;
+      this.dollarhandle = false;
+      this.eurohandle = false;
+    },
+
     onSubmitUpdatePay(e) {
       e.preventDefault();
       this.$refs.editPayUserModal.hide();
@@ -323,12 +346,23 @@ export default {
       };
       this.updateUserPay(payload);
       this.editOn = false;
+      this.clearValletCheckout();
+      this.checkoutShow = false;
     },
 
     onResetUpdatePay(e) {
       e.preventDefault();
       this.$refs.editPayUserModal.hide();
     },
+
+    setupNdfl() {
+      if(this.user.contract === "Фриланс") {
+        this.ndfl = 6
+      } else {
+        this.ndfl = 13
+      }
+    }
+
   },
   mounted() {
     this.getUsers();
@@ -345,5 +379,10 @@ export default {
   flex-flow: row;
   align-items: center;
   justify-content: space-between;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 </style>
