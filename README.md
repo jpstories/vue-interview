@@ -1,9 +1,11 @@
-![76756](https://user-images.githubusercontent.com/41709736/97656707-c7e3df00-1ab3-11eb-83b4-990c334c59d8.png)
-![534534](https://user-images.githubusercontent.com/41709736/97768440-de02a580-1b6e-11eb-85fc-332dd3262e6e.png)
-![added](https://user-images.githubusercontent.com/41709736/97656715-d03c1a00-1ab3-11eb-8247-fb09dbd43311.png)
-![656456](https://user-images.githubusercontent.com/41709736/97656720-d7fbbe80-1ab3-11eb-9469-5dfcf53bddec.png)
+![7272727](https://user-images.githubusercontent.com/41709736/98456403-e5f2c300-21c8-11eb-99bd-436f4eba3f47.png)
+![0192](https://user-images.githubusercontent.com/41709736/98456407-ee4afe00-21c8-11eb-9a74-8e0fdc946864.png)
+![92929](https://user-images.githubusercontent.com/41709736/98456415-f99e2980-21c8-11eb-9d33-a26c4309149c.png)
+![828282](https://user-images.githubusercontent.com/41709736/98456420-015dce00-21c9-11eb-8936-901f63e02bef.png)
 
-## Install and start
+## Install
 ### 1. npm install
-### 2. json-server --watch db.json
-### 3. npm run serve
+### 2. npm install -g json-server (admin root)
+## Start
+### json-server --watch db.json
+### npm run serve
