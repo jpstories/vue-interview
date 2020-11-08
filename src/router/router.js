@@ -1,24 +1,24 @@
-import Vue from 'vue';
-import Router from 'vue-router';
+import Vue from "vue";
+import Router from "vue-router";
 
-import UserTable from '../components/UserTable/UserTable';
-import UserDetails from '../components/UserDetails/UserDetails';
+import HomePage from "../pages/HomePage/HomePage";
+import PaymentsPage from "../pages/PaymentsPage/PaymentsPage";
 
 Vue.use(Router);
 
 export default new Router({
     routes: [
         {
-            path: '/',
-            name: 'usertable',
-            component: UserTable,
+            path: "/",
+            name: "homepage",
+            component: HomePage,
         },
         {
-            path: '/user/:id/details',
-            name: 'details',
-            component: UserDetails,
-            props: true
+            path: "/user/:id/payments",
+            name: "payments",
+            component: PaymentsPage,
+            props: true,
         },
     ],
-    mode: 'history',
+    mode: "history",
 });
