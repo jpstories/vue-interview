@@ -1,66 +1,66 @@
 .v-table {
     max-width: 1280px;
     margin: 0 auto;
-  }
-  
-  .v-table__pagination {
+}
+
+.v-table__pagination {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     margin-top: 15px;
-  }
-  
-  .v-table__empty {
+}
+
+.v-table__empty {
     min-height: 100px;
     display: flex;
     flex-flow: column;
     align-items: center;
     justify-content: center;
-  }
-  
-  .v-table__empty svg {
+}
+
+.v-table__empty svg {
     width: 150px;
     height: 150px;
-  }
-  
-  .v-table img {
+}
+
+.v-table img {
     width: 26px;
     height: 30px;
     cursor: pointer;
     margin-left: 5px;
-  }
-  
-  .v-table img:hover {
+}
+
+.v-table img:hover {
     transform: scale(0.9);
-  }
-  
-  .v-table__money-sort {
+}
+
+.v-table__money-sort {
     transition: 0.2s;
     width: 30px !important;
-  }
-  
-  .page {
+}
+
+.page {
     padding: 8px;
     border: 1px solid #e7e7e7;
     margin-right: 15px;
-  }
-  .page:hover {
+}
+.page:hover {
     background: #accccc;
     cursor: pointer;
     color: white;
-  }
-  .page__selected {
+}
+.page__selected {
     background: #accccc;
     cursor: pointer;
     color: white;
-  }
-  .calendar {
+}
+.calendar {
     cursor: pointer;
-  }
-  .table thead th {
+}
+.table thead th {
     vertical-align: top !important;
-  }
-  .form-input-profit {
+}
+.form-input-profit {
     display: flex;
     flex-flow: row;
-  }
+}
