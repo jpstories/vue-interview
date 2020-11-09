@@ -1,7 +1,7 @@
-![7272727](https://user-images.githubusercontent.com/41709736/98456403-e5f2c300-21c8-11eb-99bd-436f4eba3f47.png)
-![0192](https://user-images.githubusercontent.com/41709736/98456407-ee4afe00-21c8-11eb-9a74-8e0fdc946864.png)
-![92929](https://user-images.githubusercontent.com/41709736/98456415-f99e2980-21c8-11eb-9d33-a26c4309149c.png)
-![828282](https://user-images.githubusercontent.com/41709736/98456420-015dce00-21c9-11eb-8936-901f63e02bef.png)
+![10101](https://user-images.githubusercontent.com/41709736/98468125-c4272980-2224-11eb-9a67-c875048a1fef.png)
+![141414](https://user-images.githubusercontent.com/41709736/98468136-d2754580-2224-11eb-9aee-a058ab55e987.png)
+![121212](https://user-images.githubusercontent.com/41709736/98468144-dacd8080-2224-11eb-80e7-c20cb5fd64d9.png)
+![131313](https://user-images.githubusercontent.com/41709736/98468150-e1f48e80-2224-11eb-8253-4d433788a10e.png)
 
 ## Install
 ### 1. npm install
