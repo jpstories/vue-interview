@@ -4,6 +4,9 @@
     width: 1200px;
     margin: 0 auto;
 }
+.payment__table {
+    width: 1155px;
+}
 .payment__user-head {
     display: flex;
     flex-flow: row;
@@ -47,9 +50,13 @@
     border-radius: 5px;
 }
 
-.payment__year-month {
-    width: 100px;
-    border: 1px solid #e7e7e7;
+.payment__year {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    height: 50px;
 }
 
 .payment__year-head {
@@ -57,25 +64,40 @@
     color: rgb(51, 51, 51);
     font-size: 1.1em;
 }
-.payment__year {
-    display: flex;
-    flex-flow: row;
-    justify-content: space-between;
-    align-items: center;
-    text-align: center;
-    border: 1px solid #e7e7e7;
-    height: 60px;
+
+.payment__year-actions {
+    width: 120px !important;
 }
+
 .payment__table {
     display: flex;
     flex-flow: column;
 }
 .payment__table .payment__year .payment__year-month {
     font-weight: 700;
+    width: 90px;
+    border-right: 1px solid #e7e7e7;
+    height: 100%;
+    line-height: 2.5;
+    box-sizing: border-box;
+}
+
+.payment__year-month-modal {
+ border: none !important;
+}
+
+.payment__year-month-price {
+    line-height: 5 !important;
 }
 
 .payment__year-body {
-    height: 120px;
+    height: 80px;
+    border: 1px solid rgb(230, 230, 230);
+}
+
+.payment__action-btn {
+    display: flex;
+    flex-flow: column;
 }
 
 .converter {
@@ -143,7 +165,7 @@
 }
 
 .payment__year-actions {
-    width: 220px;
+    width: 150px;
 }
 
 .payment__checkout {
@@ -175,4 +197,8 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+.actions {
+    margin-top: 15px;
 }
